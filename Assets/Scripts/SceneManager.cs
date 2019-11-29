@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
 public class SceneManager : MonoBehaviour {
 
     public static SceneManager instance;
@@ -88,11 +89,41 @@ public class SceneManager : MonoBehaviour {
         foreach (Destination i in destinList)
         {
             GameObject b = Instantiate(destinText);
-            b.transform.parent = canvas.transform;
-            b.GetComponent<RectTransform>().anchoredPosition.x = -500 - height;
+            b.transform.SetParent(canvas.transform);//= canvas.transform;
+            b.GetComponent<Text>().text = i.content;
+            b.tag = i.eventId.ToString();
+            b.name = i.branchId.ToString();
+            RectTransform rect = b.GetComponent<RectTransform>();
+
+            EventTrigger eventTrigger = b.AddComponent<EventTrigger>();
+
+            EventTrigger.Entry entry_Click = new EventTrigger.Entry();
+            entry_Click.eventID = EventTriggerType.PointerClick;
+            entry_Click.callback.AddListener((data) => { OnPointerClick((PointerEventData)data); });
+            eventTrigger.triggers.Add(entry_Click);
+
+
+            //rect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Bottom, 0, 0);
+            //rect.SetInsetAndSizeFromParentEdge(RectTransform.Edge.Top, 0, 0);
+            rect.localScale = new Vector2(1, 1);
+            rect.offsetMin = new Vector2(100, rect.offsetMin.y);
+            rect.offsetMax = new Vector2(-100, rect.offsetMax.y);
+            rect.localPosition = new Vector2(rect.localPosition.x, -400-height);
+            height += 350 / destinList.Count;
+            //rect.SetInsetAndSizeFromParentEdge()
+            //b.GetComponent<RectTransform>().
+            //b.GetComponent<RectTransform>().anchoredPosition = new Vector2(pos.x, -500 - height); // .anchoredPosition.x = -500 - height;
         }
         
 
+    }
+
+    void OnPointerClick(PointerEventData data)
+    {
+        int eventID = int.Parse(data.pointerEnter.transform.tag);
+        int branchID = int.Parse(data.pointerEnter.transform.name);
+
+        Debug.Log(eventID.ToString() + branchID.ToString());
     }
 
     void SetUI(int id)
